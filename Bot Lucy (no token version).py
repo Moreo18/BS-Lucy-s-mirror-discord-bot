@@ -14,7 +14,9 @@ class MySource(menus.ListPageSource):
 
     async def format_page(self, menu, entries):
         offset = menu.current_page * self.per_page
-        return '\n'.join(f'`{i}. {v}`' for i, v in enumerate(entries, start=offset))
+        message1 = '\n'.join(f'`{i}. {v[0]}`' for i, v in enumerate(entries, start=offset))
+        message2 = "\nYou can reply a code to have the link or type d to finish your request"
+        return message1 + message2
 
 
 '''When the bot is ready : 
@@ -55,19 +57,16 @@ async def search(ctx, arg1, arg2=None, arg3=None):
     else:
         pages = menus.MenuPages(source=MySource(result), clear_reactions_after=True, delete_message_after=True)
         await pages.start(ctx)
-        codemsg = await ctx.send("You can reply a code to have the link or type d to finish your request")
 
     def check(m):
         return m.author == ctx.message.author
 
     msg = await client.wait_for('message', check=check, timeout=60.0)
     if msg.content.upper() == 'D':
-        await client.http.delete_message(codemsg.channel.id, codemsg.id)
         pages.stop()
     else:
         res = linkc(msg.content)
         pages.stop()
-        await client.http.delete_message(codemsg.channel.id, codemsg.id)
         if not res:
             await ctx.send(f"Nothing was found with the key {arg1}")
         else:
