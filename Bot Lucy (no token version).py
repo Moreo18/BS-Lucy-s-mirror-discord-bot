@@ -68,9 +68,12 @@ async def search(ctx, arg1, arg2=None, arg3=None):
         res = linkc(msg.content)
         pages.stop()
         if not res:
-            await ctx.send(f"Nothing was found with the key {arg1}")
+            await ctx.send(f"Nothing was found with the key {msg.content}")
         else:
-            await ctx.send(f"https://drive.google.com/file/d/{res[0][1]}")
+            embed = discord.Embed(title="Click here to download the map",
+                                  url=f"https://drive.google.com/file/d/{res[0][1]}", description=res[0][0],
+                                  color=0xff0080)
+            await ctx.send(embed=embed)
 
 # Handle all the error that the command search can return
 @search.error
@@ -97,7 +100,10 @@ async def link(ctx, arg1):
     if not res:
         await ctx.send(f"Nothing was found with the key {arg1}")
     else:
-        await ctx.send(f"https://drive.google.com/file/d/{res[0][1]}")
+        embed = discord.Embed(title="Click here to download the map",
+                              url=f"https://drive.google.com/file/d/{res[0][1]}", description=res[0][0],
+                              color=0xff0080)
+        await ctx.send(embed=embed)
 
 # Handle all the errors that the command link can return
 @link.error
