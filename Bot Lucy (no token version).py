@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, menus
 from Googlesearch import linkc, searchc
 from asyncio import TimeoutError
+from difflib import get_close_matches
 
 TOKEN = ''
 client = commands.Bot(command_prefix='!')
@@ -65,13 +66,19 @@ async def search(ctx, arg1, arg2=None, arg3=None):
     if msg.content.upper() == 'D':
         pages.stop()
     else:
-        res = linkc(msg.content)
-        pages.stop()
-        if not res:
-            await ctx.send(f"Nothing was found with the key {msg.content}")
+        searchres = linkc(arg1)
+        res = []
+        for item in searchres:
+            temp = item[0].split(' ')
+            res.append(temp[0].replace('(', ''))
+        gcm = get_close_matches(arg1, res)
+        if not gcm:
+            print('nope')
         else:
+            ind = res.index(gcm[0])
             embed = discord.Embed(title="Click here to download the map",
-                                  url=f"https://drive.google.com/file/d/{res[0][1]}", description=res[0][0],
+                                  url=f"https://drive.google.com/file/d/{searchres[ind][1]}",
+                                  description=searchres[ind][0],
                                   color=0xff0080)
             await ctx.send(embed=embed)
 
@@ -96,12 +103,18 @@ async def search_error(ctx, error):
 @client.command(brief="Give you the link to download the map",
                 description="Give you the link to download a map, takes 1 argument : the maps key")
 async def link(ctx, arg1):
-    res = linkc(arg1)
-    if not res:
-        await ctx.send(f"Nothing was found with the key {arg1}")
+    searchres = linkc(arg1)
+    res = []
+    for item in searchres:
+        temp = item[0].split(' ')
+        res.append(temp[0].replace('(', ''))
+    gcm = get_close_matches(arg1, res)
+    if not gcm:
+        print('nope')
     else:
+        ind = res.index(gcm[0])
         embed = discord.Embed(title="Click here to download the map",
-                              url=f"https://drive.google.com/file/d/{res[0][1]}", description=res[0][0],
+                              url=f"https://drive.google.com/file/d/{searchres[ind][1]}", description=searchres[ind][0],
                               color=0xff0080)
         await ctx.send(embed=embed)
 

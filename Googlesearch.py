@@ -41,7 +41,7 @@ def linkc(searching):
     service = get_gdrive_service()
     # The folder id is supposed to be between '' but I delete it to avoid problems on sharing this folder
     search_result = search(service,
-                           query=f"'' in parents and fullText contains '\"{searching}\"'")
+                           query=f"'' in parents and name contains '\"{searching}\"'")
     return search_result
 
 def search(service, query):
