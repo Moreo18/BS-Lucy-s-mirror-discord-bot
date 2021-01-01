@@ -170,7 +170,7 @@ async def glink(ctx):
 async def glink_error(ctx,error):
     error = getattr(error, "original", error)
     if isinstance(error, TimeoutError):
-        await ctx.send('The request timed out\nDon\'t forget to send "d" to get your links')
+        await ctx.send('The request timed out\nDon\'t forget to send "d" to end your request list')
     else:
         print(error)
 
