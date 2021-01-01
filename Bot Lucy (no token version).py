@@ -127,6 +127,53 @@ async def link_error(ctx, error):
         await ctx.send("Sorry, an error occurred, you can report it in the <#788827448166711356> channel")
         print(error)
 
+# Give all the link to songs given by the user
+@client.command(brief="list all the map you want and then, get link")
+async def glink(ctx):
+    await ctx.send('Send a message for each song you want to download and then send d to have all the links')
+
+    def check(m):
+        return m.author == ctx.author
+
+    res = []
+    rese = []
+    msg = await client.wait_for('message', check=check, timeout=60.0)
+    res.append(msg.content)
+    while msg.content.upper() != 'd'.upper():
+        msg = await client.wait_for('message', check=check, timeout=60.0)
+        res.append(msg.content)
+    for item in res:
+        if item == 'd':
+            break
+        else:
+            searchres = linkc(item)
+            ress = []
+            for item2 in searchres:
+                temp = item2[0].split(' ')
+                ress.append(temp[0].replace('(', ''))
+            gcm = get_close_matches(item, ress)
+            if not gcm:
+                rese.append('Not found')
+            else:
+                ind = ress.index(gcm[0])
+                rese.append(searchres[ind])
+    message = ''
+    for item in rese:
+        if item == 'Not found':
+            message += f"{res[rese.index(item)]} : Not found\n"
+        else:
+            message += f'{item[0]} : <https://drive.google.com/file/d/{item[1]}>\n'
+    await ctx.send(message)
+
+# Handle all the errors that the glink command can return
+@glink.error
+async def glink_error(ctx,error):
+    error = getattr(error, "original", error)
+    if isinstance(error, TimeoutError):
+        await ctx.send('The request timed out\nDon\'t forget to send "d" to get your links')
+    else:
+        print(error)
+
 # Make the bot stops and send a message to say that it's under maintenance
 @client.command()
 @commands.has_role('Yee')
