@@ -83,7 +83,7 @@ async def search(ctx, arg1, arg2=None, arg3=None):
                                       color=0xff0080)
                 await ctx.send(embed=embed)
     else:
-        client.http.delete_message(ctx.message.channel.id, ctx.message.id)
+        await client.http.delete_message(ctx.message.channel.id, ctx.message.id)
 
 # Handle all the error that the command search can return
 @search.error
@@ -123,7 +123,7 @@ async def link(ctx, arg1):
                                   color=0xff0080)
             await ctx.send(embed=embed)
     else:
-        client.http.delete_message(ctx.message.channel.id, ctx.message.id)
+        await client.http.delete_message(ctx.message.channel.id, ctx.message.id)
 
 # Handle all the errors that the command link can return
 @link.error
@@ -173,7 +173,7 @@ async def glink(ctx):
                 message += f'{item[0]} : <https://drive.google.com/file/d/{item[1]}>\n'
         await ctx.send(message)
     else:
-        client.http.delete_message(ctx.message.channel.id, ctx.message.id)
+        await client.http.delete_message(ctx.message.channel.id, ctx.message.id)
 
 # Handle all the errors that the glink command can return
 @glink.error
