@@ -67,14 +67,14 @@ async def search(ctx, arg1, arg2=None, arg3=None):
         if msg.content.upper() == 'D':
             pages.stop()
         else:
-            searchres = linkc(arg1)
+            searchres = linkc(msg.content)
             res = []
             for item in searchres:
                 temp = item[0].split(' ')
                 res.append(temp[0].replace('(', ''))
             gcm = get_close_matches(arg1, res)
             if not gcm:
-                print('nope')
+                await ctx.send(f'Nothing was found with the key {msg.content}')
             else:
                 ind = res.index(gcm[0])
                 embed = discord.Embed(title="Click here to download the map",
@@ -114,7 +114,7 @@ async def link(ctx, arg1):
             res.append(temp[0].replace('(', ''))
         gcm = get_close_matches(arg1, res)
         if not gcm:
-            print('nope')
+            await ctx.send(f'Nothing was found with the key {arg1}')
         else:
             ind = res.index(gcm[0])
             embed = discord.Embed(title="Click here to download the map",
