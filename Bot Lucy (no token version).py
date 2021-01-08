@@ -41,14 +41,13 @@ async def on_ready():
 
 # Search command which uses the Googlesearch program
 @client.command(brief="Search for a map and return all the results", description="Search for a map and return all the results, takes from 1 to 3 arguments")
-async def search(ctx, arg1, arg2='', arg3='', arg4=''):
+async def search(ctx, *args):
     if ctx.message.channel.id == 788806891388141629:
-        tosearch = arg1 + arg2 + arg3 + arg4
 
-        result = searchc(tosearch)
+        result = searchc(' '.join(args))
 
         if not result:
-            await ctx.send(f"Nothing was found with the argument {tosearch}")
+            await ctx.send(f"Nothing was found with the argument {' '.join(args)}")
         else:
             pages = menus.MenuPages(source=MySource(result), clear_reactions_after=True, delete_message_after=True)
             await pages.start(ctx)
@@ -65,7 +64,7 @@ async def search(ctx, arg1, arg2='', arg3='', arg4=''):
             for item in searchres:
                 temp = item[0].split(' ')
                 res.append(temp[0].replace('(', ''))
-            gcm = get_close_matches(arg1, res)
+            gcm = get_close_matches(mqg.content, res)
             if not gcm:
                 await ctx.send(f'Nothing was found with the key {msg.content}')
             else:
