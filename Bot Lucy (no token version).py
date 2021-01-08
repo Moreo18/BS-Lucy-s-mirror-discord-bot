@@ -41,16 +41,9 @@ async def on_ready():
 
 # Search command which uses the Googlesearch program
 @client.command(brief="Search for a map and return all the results", description="Search for a map and return all the results, takes from 1 to 3 arguments")
-async def search(ctx, arg1, arg2=None, arg3=None):
+async def search(ctx, arg1, arg2='', arg3='', arg4=''):
     if ctx.message.channel.id == 788806891388141629:
-        if arg3 is not None:
-            tosearch = f"{arg1} {arg2} {arg3}"
-
-        elif arg3 is None and arg2 != None:
-            tosearch = f"{arg1} {arg2}"
-
-        else:
-            tosearch = arg1
+        tosearch = arg1 + arg2 + arg3 + arg4
 
         result = searchc(tosearch)
 
