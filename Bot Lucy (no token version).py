@@ -8,7 +8,7 @@ import json
 
 TOKEN = ''
 client = commands.Bot(command_prefix='!')
-channel = client.get_channel()
+channel = None
 
 
 class MySource(menus.ListPageSource):
@@ -25,6 +25,7 @@ class MySource(menus.ListPageSource):
 # Change rich presence and print in console that the bot is ready
 @client.event
 async def on_ready():
+    global channel
     channel = client.get_channel()
     print('hello')
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='des talons'))
@@ -69,8 +70,7 @@ async def search(ctx, *args):
                 await ctx.send(f'Nothing was found with the key {msg.content}')
             else:
                 embed = discord.Embed(title="Click here to download the map",
-                                      url=f"https://drive.google.com/file/d/{searchres[gcm][1]}",
-                                      description=searchres[gcm][0],
+                                      url=f"https://drive.google.com/file/d/{gcm[1]}", description=gcm[0],
                                       color=0xff0080)
                 await ctx.send(embed=embed)
     else:
@@ -111,7 +111,7 @@ async def link(ctx, arg1):
             await ctx.send(f'Nothing was found with the key {arg1}')
         else:
             embed = discord.Embed(title="Click here to download the map",
-                                  url=f"https://drive.google.com/file/d/{searchres[gcm][1]}", description=searchres[gcm][0],
+                                  url=f"https://drive.google.com/file/d/{gcm[1]}", description=gcm[0],
                                   color=0xff0080)
             await ctx.send(embed=embed)
     else:
