@@ -1,14 +1,16 @@
 import discord
 from discord.ext import commands, menus
-from Googlesearch import linkc, searchc
+from Googlestuff import linkc, searchc
 from asyncio import TimeoutError
-from difflib import get_close_matches
+from requests import get
+import json
+
 
 TOKEN = ''
 client = commands.Bot(command_prefix='!')
+channel = client.get_channel()
 
 
-# Menu Class for the search command
 class MySource(menus.ListPageSource):
     def __init__(self, data):
         super().__init__(data, per_page=10)
@@ -20,14 +22,10 @@ class MySource(menus.ListPageSource):
         return message1 + message2
 
 
-'''When the bot is ready : 
-   - It opens the channel,
-   - Change the rich presence,
-   - Erase the old message that says the bot is under maintenance,
-   - Says in the channel that it's ready'''
+# Change rich presence and print in console that the bot is ready
 @client.event
 async def on_ready():
-    channel = client.get_channel(788806891388141629)
+    channel = client.get_channel()
     print('hello')
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='des talons'))
     with open('last.txt', 'r') as f:
@@ -39,10 +37,11 @@ async def on_ready():
     await channel.set_permissions(channel.guild.default_role, overwrite=perms)
     await channel.send("The bot is back online, sorry for the trouble")
 
-# Search command which uses the Googlesearch program
-@client.command(brief="Search for a map and return all the results", description="Search for a map and return all the results, takes from 1 to 3 arguments")
+
+# Command to search a song and to get the link to it
+@client.command(brief="Search for a map and return all the results", description="Search for a map and return all the results")
 async def search(ctx, *args):
-    if ctx.message.channel.id == 788806891388141629:
+    if ctx.message.channel == channel:
 
         result = searchc(' '.join(args))
 
@@ -60,24 +59,25 @@ async def search(ctx, *args):
             pages.stop()
         else:
             searchres = linkc(msg.content)
-            res = []
+            gcm = ()
             for item in searchres:
-                temp = item[0].split(' ')
-                res.append(temp[0].replace('(', ''))
-            gcm = get_close_matches(mqg.content, res)
+                key = item[0].split(' ')[0]
+                if msg.content == key:
+                    gcm = item
+                    break
             if not gcm:
                 await ctx.send(f'Nothing was found with the key {msg.content}')
             else:
-                ind = res.index(gcm[0])
                 embed = discord.Embed(title="Click here to download the map",
-                                      url=f"https://drive.google.com/file/d/{searchres[ind][1]}",
-                                      description=searchres[ind][0],
+                                      url=f"https://drive.google.com/file/d/{searchres[gcm][1]}",
+                                      description=searchres[gcm][0],
                                       color=0xff0080)
                 await ctx.send(embed=embed)
     else:
         await client.http.delete_message(ctx.message.channel.id, ctx.message.id)
 
-# Handle all the error that the command search can return
+
+# To handle all the errors of the search command
 @search.error
 async def search_error(ctx, error):
     error = getattr(error, "original", error)
@@ -94,30 +94,31 @@ async def search_error(ctx, error):
         await ctx.send("Sorry, an error occurred, you can report it in the <#788827448166711356> channel")
         print(error)
 
-# Give the link to a song using the bsr key
+
+# Command that give a link to a song from a bsr key
 @client.command(brief="Give you the link to download the map",
                 description="Give you the link to download a map, takes 1 argument : the maps key")
 async def link(ctx, arg1):
-    if ctx.message.channel.id == 788806891388141629:
+    if ctx.message.channel == channel:
         searchres = linkc(arg1)
-        res = []
+        gcm = ()
         for item in searchres:
-            temp = item[0].split(' ')
-            res.append(temp[0].replace('(', ''))
-        gcm = get_close_matches(arg1, res)
+            key = item[0].split(' ')[0]
+            if arg1 == key:
+                gcm = item
+                break
         if not gcm:
             await ctx.send(f'Nothing was found with the key {arg1}')
         else:
-            ind = res.index(gcm[0])
             embed = discord.Embed(title="Click here to download the map",
-                                  url=f"https://drive.google.com/file/d/{searchres[ind][1]}",
-                                  description=searchres[ind][0],
+                                  url=f"https://drive.google.com/file/d/{searchres[gcm][1]}", description=searchres[gcm][0],
                                   color=0xff0080)
             await ctx.send(embed=embed)
     else:
         await client.http.delete_message(ctx.message.channel.id, ctx.message.id)
 
-# Handle all the errors that the command link can return
+
+# To handle all the errors of the link command
 @link.error
 async def link_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
@@ -126,10 +127,11 @@ async def link_error(ctx, error):
         await ctx.send("Sorry, an error occurred, you can report it in the <#788827448166711356> channel")
         print(error)
 
-# Give all the link to songs given by the user
+
+# Command that give all the links to a list of maps that the user sends
 @client.command(brief="list all the map you want and then, get link")
 async def glink(ctx):
-    if ctx.message.channel.id == 788806891388141629:
+    if ctx.message.channel == channel:
         await ctx.send('Send a message for each song you want to download and then send d to have all the links')
 
         def check(m):
@@ -146,17 +148,17 @@ async def glink(ctx):
             if item == 'd':
                 break
             else:
-                searchres = linkc(item)
-                ress = []
-                for item2 in searchres:
-                    temp = item2[0].split(' ')
-                    ress.append(temp[0].replace('(', ''))
-                gcm = get_close_matches(item, ress)
+                searchres = linkc(msg.content)
+                gcm = ()
+                for item in searchres:
+                    key = item[0].split(' ')[0]
+                    if msg.content == key:
+                        gcm = item
+                        break
                 if not gcm:
                     rese.append('Not found')
                 else:
-                    ind = ress.index(gcm[0])
-                    rese.append(searchres[ind])
+                    rese.append(gcm)
         message = ''
         for item in rese:
             if item == 'Not found':
@@ -167,38 +169,80 @@ async def glink(ctx):
     else:
         await client.http.delete_message(ctx.message.channel.id, ctx.message.id)
 
-# Handle all the errors that the glink command can return
+
+# To handle all the errors of the glink command
 @glink.error
 async def glink_error(ctx,error):
     error = getattr(error, "original", error)
     if isinstance(error, TimeoutError):
         await ctx.send('The request timed out\nDon\'t forget to send "d" to end your request list')
     else:
+        await ctx.send("Sorry, an error occurred, you can report it in the <#788827448166711356> channel")
         print(error)
 
-# Make the bot stops and send a message to say that it's under maintenance
-@client.command()
-@commands.has_role('Yee')
-async def stop(ctx):
-    perms = ctx.channel.overwrites_for(ctx.guild.default_role)
-    perms.send_messages = False
-    await ctx.channel.set_permissions(ctx.guild.default_role, overwrite=perms)
-    await client.http.delete_message(ctx.message.channel.id, ctx.message.id)
-    msg = await ctx.send('**The Bot is under maintenance, sorry for the trouble**')
-    with open("last.txt", 'w') as f:
-        list = []
-        list.append(msg.channel.id)
-        list.append(msg.id)
-        f.write(str(list))
-    exit()
 
-# Handle all the errors that the stop command can return
-@stop.error
-async def stop_error(ctx, error):
-    if isinstance(error, commands.MissingRole):
-        await client.http.delete_message(ctx.message.channel.id, ctx.message.id)
+# Send in private all the links to all the song in an attached playlist
+@client.command(brief='Send all the link to download an entire playlist')
+async def playlist(ctx):
+    if ctx.message.channel == channel:
+        headers = {
+            'User-Agent': 'DiscordBot/3.0'}
+        url = ctx.message.attachments[0].url
+        bsurl = 'https://beatsaver.com/api/maps/by-hash/'
+        result = []
+        req = get(url)
+        jfile = json.loads(req.text)
+        nbr = 0
+        for item in jfile['songs']: nbr += 1
+        if nbr >= 50:
+            await ctx.send('Sorry, you can\'t download a playlist with more than 50 maps')
+        else:
+            await ctx.send(f'Playlist : {jfile["playlistTitle"]}, please wait <a:loading:799952358704283658>')
+            for item in jfile['songs']:
+                bsreq = get(bsurl + item['hash'], headers=headers)
+                bsfile = json.loads(bsreq.text)
+                searchres = linkc(bsfile['key'])
+                gcm = ()
+                for item2 in searchres:
+                    key = item2[0].split(' ')[0]
+                    if bsfile['key'] == key:
+                        gcm = item2
+                        break
+                if not gcm:
+                    result.append('Not found')
+                else:
+                    result.append(gcm)
+            message = ''
+            chacount = 0
+            split = False
+            for item in result:
+                if chacount + len(f'{item[0]} : <https://drive.google.com/file/d/{item[1]}>\n') >= 2000:
+                    chacount = 0
+                    message += 'ò'
+                    split = True
+                if item == 'Not found':
+                    message += f"Not found\n"
+                else:
+                    chacount += len(f'{item[0]} : <https://drive.google.com/file/d/{item[1]}>\n')
+                    message += f'{result.index(item) + 1}. {item[0]} : <https://drive.google.com/file/d/{item[1]}>\n'
+            if split:
+                messagelist = message.split('ò')
+                for item in messagelist:
+                    await ctx.send(item)
+            else:
+                await ctx.send(message)
     else:
-        ctx.send("Sorry, an error occurred, you can report it in the <#788827448166711356> channel")
+        await client.http.delete_message(ctx.message.channel.id, ctx.message.id)
+
+
+# To handle all the errors of the playlist command
+@playlist.error
+async def playlist_error(ctx,error):
+    error = getattr(error, "original", error)
+    if isinstance(error, IndexError):
+        await ctx.send('You need to attach a playlist in json or bplist with your message')
+    else:
+        await ctx.send("Sorry, an error occurred, you can report it in the <#788827448166711356> channel")
         print(error)
 
 
