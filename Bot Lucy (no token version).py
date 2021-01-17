@@ -228,9 +228,9 @@ async def playlist(ctx):
             if split:
                 messagelist = message.split('ò')
                 for item in messagelist:
-                    await ctx.send(item)
+                    await ctx.author.send(item)
             else:
-                await ctx.send(message)
+                await ctx.author.send(message)
     else:
         await client.http.delete_message(ctx.message.channel.id, ctx.message.id)
 
