@@ -197,7 +197,7 @@ async def playlist(ctx):
         if nbr >= 50:
             await ctx.send('Sorry, you can\'t download a playlist with more than 50 maps')
         else:
-            await ctx.send(f'Playlist : {jfile["playlistTitle"]}, please wait <a:loading:799952358704283658>')
+            msg = await ctx.send(f'Playlist : {jfile["playlistTitle"]}, please wait <a:loading:799952358704283658>')
             for item in jfile['songs']:
                 bsreq = get(bsurl + item['hash'], headers=headers)
                 bsfile = json.loads(bsreq.text)
@@ -231,6 +231,8 @@ async def playlist(ctx):
                     await ctx.author.send(item)
             else:
                 await ctx.author.send(message)
+        client.http.edit_message(msg.channel.id, msg.id,
+                                 f'Playlist : {jfile["playlistTitle"]}, Delivered <a:BlobSaber:764539666686017605>')
     else:
         await client.http.delete_message(ctx.message.channel.id, ctx.message.id)
 
